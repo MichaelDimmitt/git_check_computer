@@ -22,3 +22,5 @@ create_persist_file() {
   cat .persist.txt | wc -l;
 };
 create_persist_file;
+unset -f run_with_dots
+unset -f create_permission_file
