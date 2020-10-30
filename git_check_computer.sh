@@ -18,7 +18,14 @@ create_persist_file() {
   echo -e " \033[5;32;47m pass! no longer awaiting input: \033[0m"
   echo "Working on creating a ~/.persist file, this may take 4 minutes future lookups will be much faster!";
   echo "searching the following directory: $HOME/$answer";
-  run_with_dots find $HOME/$answer -type d -name .git 2>/dev/null > ~/.persist.txt;
+  dir=$HOME
+  if [ -z "$answer" ]
+  then
+    answer=$answer
+  else 
+    answer="/$answer"
+  fi
+  run_with_dots find  $HOME$answer -type d -name .git 2>/dev/null > ~/.persist.txt;
   cat ~/.persist.txt | grep -v "Library" > fold.txt && mv fold.txt ~/.persist.txt;
   cat ~/.persist.txt | wc -l;
 };
@@ -26,9 +33,11 @@ create_persist_file() {
 check_what_projects_need_git_changes() {
   cat ~/.persist.txt | while read line 
   do
-    cd ${line::${#line}-5};
+    directory=${line::${#line}-5};
+    cd $directory;
     branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
-    git diff --quiet $branch origin/$branch 2>/dev/null || echo "git action needed at: "$line
+    git diff --quiet $branch 2>/dev/null || echo "git action needed, local differs at: "$directory
+    git diff --quiet $branch origin/$branch 2>/dev/null || echo "git action needed, remote differs at: "$directory
   done
 }
 [ -f ~/.persist.txt ] &&  
