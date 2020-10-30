@@ -20,3 +20,9 @@ If you want support for your platform please open an issue and I will upload sho
 3) all git projects are found within git directories listed using the find command.
 4) the folders found are added to a ~/.persist file
 
+## Try it out without downloading the package:
+```bash
+bash <(curl -s https://raw.githubusercontent.com/MichaelDimmitt/git_check_computer/master/git_check_computer.sh)
+```
+
+## Homebrew package coming soon
