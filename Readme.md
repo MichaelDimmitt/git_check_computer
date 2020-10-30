@@ -16,7 +16,7 @@ If you want support for your platform please open an issue and I will upload sho
 ## How it works
 #### The persist file
 1) a prompt asks for your git directories within the home directory delimited by spaces. 
-2) if no imput is provided the home directory is used as a default.
+2) if no input is provided the home directory is used as a default.
 3) all git projects are found within git directories listed using the find command.
 4) the folders found are added to a ~/.persist file
 
