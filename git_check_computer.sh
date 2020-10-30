@@ -1,3 +1,4 @@
+#!/bin/bash
 run_with_dots() {
   # https://stackoverflow.com/a/25904176/5283424
   "$@" &
