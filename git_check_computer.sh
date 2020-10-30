@@ -21,6 +21,21 @@ create_persist_file() {
   cat ~/.persist.txt | grep -v "Library" > fold.txt && mv fold.txt ~/.persist.txt;
   cat ~/.persist.txt | wc -l;
 };
-create_persist_file;
+
+[ -f ~/.persist.txt ] || (
+  echo "creating persist file";
+  create_persist_file;
+)
+[ -f ~/.persist.txt ] &&  
+  ( echo "persist file, type [Uu] to update or any character to continue";
+    old_stty_cfg=$(stty -g);
+    stty raw -echo ; answer=$(head -c 1) ; stty $old_stty_cfg;
+    if echo "$answer" | grep -iq "^u" ;then
+        echo "updating persist file";
+        create_persist_file;
+    else
+        echo No;
+    fi )
+
 unset -f run_with_dots;
 unset -f create_permission_file;
