@@ -22,20 +22,28 @@ create_persist_file() {
   cat ~/.persist.txt | wc -l;
 };
 
-[ -f ~/.persist.txt ] || (
-  echo "creating persist file";
-  create_persist_file;
-)
+check_what_projects_need_git_changes() {
+  cat ~/.persist.txt | while read line 
+  do
+    cd ${line::${#line}-5};
+    branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+    git diff --quiet $branch origin/$branch 2>/dev/null || echo "git action needed at: "$line
+  done
+}
 [ -f ~/.persist.txt ] &&  
   ( echo "persist file, type [Uu] to update or any character to continue";
     old_stty_cfg=$(stty -g);
     stty raw -echo ; answer=$(head -c 1) ; stty $old_stty_cfg;
     if echo "$answer" | grep -iq "^u" ;then
         echo "updating persist file";
-        create_persist_file;
+        create_persist_file && check_what_projects_need_git_changes;
     else
-        echo No;
+        check_what_projects_need_git_changes;
     fi )
+
+[ -f ~/.persist.txt ] || (
+  create_persist_file && check_what_projects_need_git_changes;
+)
 
 unset -f run_with_dots;
 unset -f create_permission_file;
