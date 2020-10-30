@@ -27,3 +27,6 @@ bash <(curl -s https://raw.githubusercontent.com/MichaelDimmitt/git_check_comput
 
 ## Homebrew package 
 #### coming soon
+
+## Demonstration
+![use-existing-persist-file-take2](https://user-images.githubusercontent.com/11463275/97744153-21044080-1abd-11eb-9a4a-3e21a4992f7b.gif)
