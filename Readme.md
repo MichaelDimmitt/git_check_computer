@@ -9,7 +9,8 @@ quickly check your computer projects with
 4) changes not pushed
 
 ## Current supported environments: 
-💻&nbsp;&nbsp;&nbsp;Macintosh
+💻&nbsp;&nbsp;&nbsp;Macintosh<br/>
+🐧&nbsp;&nbsp;&nbsp;Ubuntu - Linux
 
 If you want support for your platform please open an issue and I will upload shortly.
 
