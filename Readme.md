@@ -1,5 +1,5 @@
 #### Info:
-To see all overrides navigate to: MichaelDimmitt/my-bashrc-git-overrides
+To see all overrides navigate to: https://github.com/MichaelDimmitt/my-bashrc-git-overrides
 
 ## Git Check Computer Command
 quickly check your computer for<br/>
