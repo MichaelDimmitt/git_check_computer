@@ -1,3 +1,6 @@
+#### Info:
+To see all overrides navigate to: MichaelDimmitt/my-bashrc-git-overrides
+
 ## Git Check Computer Command
 quickly check your computer for<br/>
 projects that require git actions to be up to date with origin
