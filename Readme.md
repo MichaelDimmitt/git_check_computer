@@ -17,6 +17,20 @@ quickly check your computer projects with
 
 If you want support for your platform please open an issue and I will upload shortly.
 
+## Windows PowerShell
+
+Windows is supported by the separate `git_check_computer.ps1` script. Scan the
+C drive with:
+
+```powershell
+.\git_check_computer.ps1 -Path C:\
+```
+
+Add `-Fetch` to refresh remote-tracking branches before comparing them. A run
+with `-Path` refreshes the cached repository list; later runs without `-Path`
+reuse it. Whole-drive scans skip standard Windows, application-data, and
+dependency directories by default. Override `-ExcludeDirectoryName` if needed.
+
 ## How it works
 #### The persist file
 1) a prompt asks for your git directories within the home directory delimited by spaces. 
