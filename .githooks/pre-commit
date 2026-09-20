@@ -1,0 +1,91 @@
+#!/usr/bin/env bash
+# Lints staged scripts before a commit is created.
+#
+#   *.sh   shellcheck       https://github.com/koalaman/shellcheck
+#   *.ps1  PSScriptAnalyzer https://github.com/PowerShell/PSScriptAnalyzer
+#
+# Enable with:  git config core.hooksPath .githooks
+# Bypass with:  git commit --no-verify
+#
+# A missing linter is a warning, not a failure, so a contributor who has not
+# installed the tools is never blocked from committing.
+
+set -uo pipefail
+
+status=0
+repo_root=$(git rev-parse --show-toplevel)
+tmp=$(mktemp -d) || exit 1
+trap 'rm -rf "$tmp"' EXIT
+
+# staged files matching a pathspec, filtered to added/copied/modified so that
+# a staged deletion is not handed to a linter
+collect() {
+  files=()
+  while IFS= read -r -d '' f
+  do
+    files+=("$f")
+  done < <(git diff --cached --name-only --diff-filter=ACM -z -- "$@")
+}
+
+# copy staged content out of the index, so the hook lints what is about to be
+# committed rather than the working tree, which may hold unstaged edits
+extract_staged() {
+  local dest="$tmp/$1"
+  mkdir -p "$(dirname "$dest")" || return 1
+  git show ":$1" > "$dest" || return 1
+}
+
+# the hook itself has no extension, so name it explicitly to keep it self linting
+collect '*.sh' '.githooks/pre-commit'
+if [ ${#files[@]} -gt 0 ]
+then
+  if command -v shellcheck > /dev/null 2>&1
+  then
+    for f in "${files[@]}"
+    do
+      extract_staged "$f" || { status=1; continue; }
+      if ! out=$(cd "$tmp" && shellcheck --format=gcc "$f" 2>&1)
+      then
+        printf '%s\n' "$out"
+        status=1
+      fi
+    done
+  else
+    printf 'pre-commit: shellcheck not found, skipped %d shell script(s)\n' "${#files[@]}" >&2
+    printf 'pre-commit:   brew install shellcheck\n' >&2
+  fi
+fi
+
+collect '*.ps1'
+if [ ${#files[@]} -gt 0 ]
+then
+  if command -v pwsh > /dev/null 2>&1
+  then
+    for f in "${files[@]}"
+    do
+      extract_staged "$f" || { status=1; continue; }
+    done
+    pwsh -NoProfile -NonInteractive -File "$repo_root/.githooks/lint-powershell.ps1" \
+      -Path "$tmp" \
+      -StripPrefix "$tmp" \
+      -Settings "$repo_root/PSScriptAnalyzerSettings.psd1"
+    case $? in
+      0) ;;
+      97)
+        printf 'pre-commit: PSScriptAnalyzer not installed, skipped %d PowerShell script(s)\n' "${#files[@]}" >&2
+        printf 'pre-commit:   pwsh -Command "Install-Module PSScriptAnalyzer -Scope CurrentUser"\n' >&2
+        ;;
+      *) status=1 ;;
+    esac
+  else
+    printf 'pre-commit: pwsh not found, skipped %d PowerShell script(s)\n' "${#files[@]}" >&2
+    printf 'pre-commit:   brew install --cask powershell\n' >&2
+  fi
+fi
+
+if [ "$status" -ne 0 ]
+then
+  printf '\npre-commit: lint failed, commit aborted. Use --no-verify to override.\n' >&2
+fi
+
+exit "$status"
