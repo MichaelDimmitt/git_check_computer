@@ -162,6 +162,26 @@ if ($needsAction.Count -eq 0) {
     exit 0
 }
 
-$needsAction | Format-Table Repository, Branch, Untracked, Unstaged, Staged, Ahead, Behind, Upstream, Issue -AutoSize
+# Repository is listed last on purpose. Format-Table -AutoSize drops trailing
+# columns when the console is narrow, and an absolute repository path is wide
+# enough to push Ahead and Behind off an 80 column terminal. Ordering the state
+# columns first means the path is what degrades, not the answer to "do I need to
+# push or pull". Issue is placed after Repository because it is usually empty
+# and is supplementary, so it is the right column to lose first. The path is
+# also shown relative to the user profile to reclaim the width that prefix
+# would otherwise consume.
+$repositoryColumn = @{
+    Name       = 'Repository'
+    Expression = {
+        $userProfile = [Environment]::GetFolderPath('UserProfile')
+        if ($userProfile -and $_.Repository.StartsWith($userProfile, [StringComparison]::OrdinalIgnoreCase)) {
+            '~' + $_.Repository.Substring($userProfile.Length)
+        } else {
+            $_.Repository
+        }
+    }
+}
+
+$needsAction | Format-Table Branch, Untracked, Unstaged, Staged, Ahead, Behind, Upstream, $repositoryColumn, Issue -AutoSize
 Write-Host "$($needsAction.Count) of $($states.Count) repositories need attention." -ForegroundColor Yellow
 exit 1
